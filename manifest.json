@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Task At Hand",
+  "version": "1.0.0",
+  "description": "Lock yourself to the current tab with a focus timer. Stay on task.",
+  "permissions": ["tabs", "alarms", "storage", "windows"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Task At Hand"
+  }
+}

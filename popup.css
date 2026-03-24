@@ -1,0 +1,234 @@
+/* ------------------------------------------------------------------ */
+/* Base                                                                 */
+/* ------------------------------------------------------------------ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #12121f;
+  color: #e8e8f0;
+  width: 300px;
+  min-height: 200px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Layout                                                               */
+/* ------------------------------------------------------------------ */
+
+.container {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #2a2a40;
+  padding-bottom: 6px;
+}
+
+header .icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+h1 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+}
+
+#view-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: #ffffff;
+  text-align: center;
+}
+
+/* ------------------------------------------------------------------ */
+/* Time input row                                                       */
+/* ------------------------------------------------------------------ */
+
+.time-inputs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.input-group input[type="text"] {
+  width: 58px;
+  padding: 8px 4px;
+  background: #1e1e35;
+  border: 1px solid #5a5a80;
+  border-radius: 6px;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+}
+
+/* keep the rule but target text inputs — no spinners to remove, just a placeholder */
+.input-group input[type="text"]::-webkit-inner-spin-button,
+.input-group input[type="text"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
+
+.input-group input[type="text"]:focus {
+  border-color: #FFD700;
+}
+
+.input-group label {
+  font-size: 10px;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.sep {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+  padding-bottom: 14px; /* align with input, not label */
+}
+
+/* ------------------------------------------------------------------ */
+/* Presets                                                              */
+/* ------------------------------------------------------------------ */
+
+.presets {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.preset {
+  background: #1e1e35;
+  border: 1px solid #5a5a80;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 11px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.preset:hover {
+  background: #2a2a4a;
+  color: #FFD700;
+  border-color: #FFD700;
+}
+
+/* ------------------------------------------------------------------ */
+/* Buttons                                                              */
+/* ------------------------------------------------------------------ */
+
+.btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: #FFD700;
+  color: #12121f;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-danger {
+  background: transparent;
+  border: 1px solid #c0392b;
+  color: #e74c3c;
+}
+
+.btn-danger:hover {
+  background: rgba(231, 76, 60, 0.12);
+}
+
+/* ------------------------------------------------------------------ */
+/* Error                                                                */
+/* ------------------------------------------------------------------ */
+
+.error {
+  font-size: 11px;
+  color: #e74c3c;
+  text-align: center;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ------------------------------------------------------------------ */
+/* Running state                                                        */
+/* ------------------------------------------------------------------ */
+
+#view-running {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 0;
+}
+
+.lock-display {
+  font-size: 40px;
+  line-height: 1;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.65; }
+}
+
+.countdown {
+  font-size: 36px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+  color: #FFD700;
+}
+
+.lock-msg {
+  font-size: 12px;
+  color: #ffffff;
+  text-align: center;
+  line-height: 1.5;
+}

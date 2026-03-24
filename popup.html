@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task At Hand</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <span class="icon" id="header-icon">🔓</span>
+      <h1>Task At Hand</h1>
+    </header>
+
+    <!-- Setup view: shown when no timer is running -->
+    <div id="view-setup">
+      <p class="subtitle">Set a timer to lock yourself to this tab.</p>
+
+      <div class="time-inputs">
+        <div class="input-group">
+          <input type="text" inputmode="numeric" id="inp-hours" data-min="0" data-max="3" value="00" maxlength="2" aria-label="Hours">
+          <label for="inp-hours">hr</label>
+        </div>
+        <div class="sep">:</div>
+        <div class="input-group">
+          <input type="text" inputmode="numeric" id="inp-minutes" data-min="0" data-max="59" value="30" maxlength="2" aria-label="Minutes">
+          <label for="inp-minutes">min</label>
+        </div>
+        <div class="sep">:</div>
+        <div class="input-group">
+          <input type="text" inputmode="numeric" id="inp-seconds" data-min="0" data-max="59" value="00" maxlength="2" aria-label="Seconds">
+          <label for="inp-seconds">sec</label>
+        </div>
+      </div>
+
+      <div class="presets">
+        <button class="preset" data-s="300">5m</button>
+        <button class="preset" data-s="900">15m</button>
+        <button class="preset" data-s="1500">25m</button>
+        <button class="preset" data-s="3600">1h</button>
+        <button class="preset" data-s="7200">2h</button>
+      </div>
+
+      <p id="error-msg" class="error hidden">Enter a time between 1 second and 3 hours.</p>
+
+      <button id="btn-start" class="btn btn-primary">
+        🔒 Start &amp; Lock Tab
+      </button>
+    </div>
+
+    <!-- Running view: shown while timer is active -->
+    <div id="view-running" class="hidden">
+      <div class="lock-display">🔒</div>
+      <div id="countdown" class="countdown">00:00:00</div>
+      <p class="lock-msg">You are locked to this tab.<br>Stay focused.</p>
+      <button id="btn-stop" class="btn btn-danger">
+        Unlock Early
+      </button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
