@@ -58,6 +58,17 @@
         Unlock Early
       </button>
     </div>
+
+    <!-- Confirm unlock view: shown during the 60-second grace period -->
+    <div id="view-confirm" class="hidden">
+      <div class="lock-display">🔒</div>
+      <p class="confirm-question">Are you sure you want to unlock?</p>
+      <div id="confirm-countdown" class="confirm-countdown">00:60</div>
+      <p class="confirm-sub">Tab unlocks when this timer ends.</p>
+      <button id="btn-resume-lock" class="btn btn-primary">
+        Resume Lock
+      </button>
+    </div>
   </div>
 
   <script src="popup.js"></script>

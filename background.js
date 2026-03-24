@@ -98,9 +98,12 @@ async function setBadge(remaining) {
 // ---------------------------------------------------------------------------
 
 const DEFAULT_STATE = {
-  isRunning:   false,
-  endTime:     null,
-  originTabId: null,
+  isRunning:          false,
+  endTime:            null,
+  originTabId:        null,
+  isConfirmingUnlock: false,
+  confirmEndTime:     null,
+  pausedRemaining:    null,
 };
 
 async function getState() {
@@ -206,16 +209,26 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name !== ALARM_NAME) return;
 
   const state = await getState();
-  if (!state.isRunning || !state.endTime) return;
+  if (!state.isRunning) return;
+
+  if (state.isConfirmingUnlock) {
+    // Check if the 60-second confirm window has expired.
+    if (state.confirmEndTime !== null && Date.now() >= state.confirmEndTime) {
+      await stopTimer();
+      chrome.runtime.sendMessage({ type: 'TIMER_FINISHED' }).catch(() => {});
+    }
+    // Badge stays showing the paused main-timer value — nothing to update.
+    return;
+  }
+
+  if (!state.endTime) return;
 
   const remaining = (state.endTime - Date.now()) / 1000;
 
   if (remaining <= 0) {
     await stopTimer();
-    // Notify popup if it happens to be open.
     chrome.runtime.sendMessage({ type: 'TIMER_FINISHED' }).catch(() => {});
   } else {
-    // Keep the badge up-to-date.
     await setBadge(remaining);
   }
 });
@@ -235,9 +248,14 @@ async function handleMessage(message) {
   switch (message.type) {
     case 'GET_STATE': {
       const state = await getState();
-      if (state.isRunning && state.endTime !== null) {
-        const remaining = Math.max(0, (state.endTime - Date.now()) / 1000);
-        return { ...state, remaining };
+      if (state.isRunning) {
+        const result = { ...state };
+        if (state.isConfirmingUnlock && state.confirmEndTime !== null) {
+          result.confirmRemaining = Math.max(0, (state.confirmEndTime - Date.now()) / 1000);
+        } else if (!state.isConfirmingUnlock && state.endTime !== null) {
+          result.remaining = Math.max(0, (state.endTime - Date.now()) / 1000);
+        }
+        return result;
       }
       return state;
     }
@@ -249,6 +267,31 @@ async function handleMessage(message) {
 
     case 'STOP_TIMER': {
       await stopTimer();
+      return { success: true };
+    }
+
+    case 'START_UNLOCK_CONFIRM': {
+      const state = await getState();
+      if (!state.isRunning || state.isConfirmingUnlock) return { success: false };
+      const remaining = Math.max(0, (state.endTime - Date.now()) / 1000);
+      await patchState({
+        isConfirmingUnlock: true,
+        confirmEndTime:     Date.now() + 60 * 1000,
+        pausedRemaining:    remaining,
+        endTime:            null, // pause the main timer
+      });
+      return { success: true };
+    }
+
+    case 'CANCEL_UNLOCK_CONFIRM': {
+      const state = await getState();
+      if (!state.isConfirmingUnlock) return { success: false };
+      await patchState({
+        isConfirmingUnlock: false,
+        confirmEndTime:     null,
+        pausedRemaining:    null,
+        endTime:            Date.now() + state.pausedRemaining * 1000,
+      });
       return { success: true };
     }
 
@@ -264,16 +307,23 @@ async function handleMessage(message) {
 (async () => {
   const state = await getState();
 
-  if (state.isRunning && state.endTime !== null) {
-    const remaining = (state.endTime - Date.now()) / 1000;
-
-    if (remaining <= 0) {
-      // Timer already expired while service worker was asleep.
-      await stopTimer();
-    } else {
-      // Restore the locked icon and badge after a service worker restart.
-      await setIcon(true);
-      await setBadge(remaining);
+  if (state.isRunning) {
+    if (state.isConfirmingUnlock) {
+      // Check if confirm window already expired while service worker was asleep.
+      if (state.confirmEndTime !== null && Date.now() >= state.confirmEndTime) {
+        await stopTimer();
+      } else {
+        await setIcon(true);
+        await setBadge(state.pausedRemaining);
+      }
+    } else if (state.endTime !== null) {
+      const remaining = (state.endTime - Date.now()) / 1000;
+      if (remaining <= 0) {
+        await stopTimer();
+      } else {
+        await setIcon(true);
+        await setBadge(remaining);
+      }
     }
   } else {
     await setIcon(false);

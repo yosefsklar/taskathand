@@ -39,6 +39,7 @@ function readInputSeconds() {
 function showSetup() {
   document.getElementById('view-setup').classList.remove('hidden');
   document.getElementById('view-running').classList.add('hidden');
+  document.getElementById('view-confirm').classList.add('hidden');
   document.getElementById('header-icon').textContent = '🔓';
   document.getElementById('error-msg').classList.add('hidden');
   stopPolling();
@@ -47,13 +48,27 @@ function showSetup() {
 function showRunning(remaining) {
   document.getElementById('view-setup').classList.add('hidden');
   document.getElementById('view-running').classList.remove('hidden');
+  document.getElementById('view-confirm').classList.add('hidden');
   document.getElementById('header-icon').textContent = '🔒';
   updateCountdown(remaining);
   startPolling();
 }
 
+function showConfirmUnlock(confirmRemaining) {
+  document.getElementById('view-setup').classList.add('hidden');
+  document.getElementById('view-running').classList.add('hidden');
+  document.getElementById('view-confirm').classList.remove('hidden');
+  document.getElementById('header-icon').textContent = '🔒';
+  updateConfirmCountdown(confirmRemaining);
+  startPolling();
+}
+
 function updateCountdown(remaining) {
   document.getElementById('countdown').textContent = formatTime(remaining);
+}
+
+function updateConfirmCountdown(remaining) {
+  document.getElementById('confirm-countdown').textContent = formatTime(remaining);
 }
 
 // ---------------------------------------------------------------------------
@@ -66,6 +81,8 @@ function startPolling() {
     const state = await chrome.runtime.sendMessage({ type: 'GET_STATE' });
     if (!state || !state.isRunning) {
       showSetup();
+    } else if (state.isConfirmingUnlock) {
+      updateConfirmCountdown(state.confirmRemaining ?? 0);
     } else {
       updateCountdown(state.remaining);
     }
@@ -86,7 +103,11 @@ function stopPolling() {
 async function init() {
   const state = await chrome.runtime.sendMessage({ type: 'GET_STATE' });
   if (state && state.isRunning) {
-    showRunning(state.remaining);
+    if (state.isConfirmingUnlock) {
+      showConfirmUnlock(state.confirmRemaining ?? 0);
+    } else {
+      showRunning(state.remaining);
+    }
   } else {
     showSetup();
   }
@@ -112,8 +133,18 @@ document.getElementById('btn-start').addEventListener('click', async () => {
 });
 
 document.getElementById('btn-stop').addEventListener('click', async () => {
-  await chrome.runtime.sendMessage({ type: 'STOP_TIMER' });
-  showSetup();
+  const state = await chrome.runtime.sendMessage({ type: 'START_UNLOCK_CONFIRM' });
+  if (state && state.success) {
+    showConfirmUnlock(60);
+  }
+});
+
+document.getElementById('btn-resume-lock').addEventListener('click', async () => {
+  const state = await chrome.runtime.sendMessage({ type: 'CANCEL_UNLOCK_CONFIRM' });
+  if (state && state.success) {
+    const fresh = await chrome.runtime.sendMessage({ type: 'GET_STATE' });
+    showRunning(fresh.remaining ?? 0);
+  }
 });
 
 // Preset buttons set the time inputs without starting the timer.
